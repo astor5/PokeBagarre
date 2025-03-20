@@ -16,7 +16,7 @@ jobs:
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: JEST Tests            # Name of the check run which will be created
-          path: build/test-results/test/binary/*.xml    # Path to test results
+          path: build/test-results/test/binary/TEST-com.montaury.pokebagarre.metier.BagarreTest.xml   # Path to test results
           reporter: java-junit        # Format of test results
   build:
     name : Integration Continue = tests + build + generation rapports AUTO
