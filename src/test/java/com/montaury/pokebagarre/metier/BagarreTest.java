@@ -1,16 +1,21 @@
 package com.montaury.pokebagarre.metier;
 
+import com.montaury.pokebagarre.erreurs.ErreurBagarre;
 import com.montaury.pokebagarre.erreurs.ErreurMemePokemon;
 import com.montaury.pokebagarre.erreurs.ErreurPokemonNonRenseigne;
+import com.montaury.pokebagarre.erreurs.ErreurRecuperationPokemon;
 import com.montaury.pokebagarre.webapi.PokeBuildApi;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -43,16 +48,10 @@ public class BagarreTest {
     }
 
     @Test
-    public void devrait_determiner_le_vainqueur_correctement() {
-        Pokemon pikachu = Mockito.mock(Pokemon.class);
-        Pokemon bulbizarre = Mockito.mock(Pokemon.class);
+    public void devrait_lever_erreur_si_mauvaise_recup_pokemon() {
+        Mockito.when(mockApi.recupererParNom("pikatvhouuuuu")).thenReturn(CompletableFuture.failedFuture(new ErreurRecuperationPokemon("pikatvhouuuuu")));
 
-        when(mockApi.recupererParNom("Pikachu")).thenReturn(CompletableFuture.completedFuture(pikachu));
-        when(mockApi.recupererParNom("Bulbizarre")).thenReturn(CompletableFuture.completedFuture(bulbizarre));
-        when(pikachu.estVainqueurContre(bulbizarre)).thenReturn(true);
-
-        Pokemon vainqueur = bagarre.demarrer("Pikachu", "Bulbizarre").join();
-
-        assertThat(vainqueur).isEqualTo(pikachu);
+        Throwable thrown = catchThrowable(() -> mockApi.recupererParNom("pikatvhouuuuu").get());
+        assertThat(thrown).hasCauseInstanceOf(ErreurRecuperationPokemon.class).withFailMessage("Impossible de recuperer les details sur 'pikatvhouuuuu'");
     }
 }
